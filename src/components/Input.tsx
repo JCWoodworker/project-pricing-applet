@@ -1,4 +1,5 @@
 import type { InputHTMLAttributes } from 'react'
+import { Input as BaseInput, Label } from '@jfc3303/jafracore-ui'
 
 export interface InputProps extends InputHTMLAttributes<HTMLInputElement> {
   label?: string
@@ -6,21 +7,18 @@ export interface InputProps extends InputHTMLAttributes<HTMLInputElement> {
 }
 
 /**
- * Stand-in for the future `@your-org/ui` Input. See `./Button.tsx` for the
- * swap-in convention.
+ * Thin wrapper around `@jfc3303/jafracore-ui`'s `Input` + `Label`, adding
+ * the label-above/suffix-beside layout this app's forms use everywhere so
+ * feature components don't need to compose it themselves each time.
  */
 export function Input({ label, suffix, id, className = '', ...props }: InputProps) {
   return (
-    <label className="flex flex-col gap-1 text-sm text-neutral-700" htmlFor={id}>
-      {label && <span className="font-medium">{label}</span>}
-      <span className="flex items-center gap-2 rounded-lg border border-neutral-300 bg-white px-3 py-2 focus-within:border-neutral-500">
-        <input
-          id={id}
-          className={`w-full text-sm text-neutral-900 outline-none ${className}`}
-          {...props}
-        />
-        {suffix && <span className="text-xs text-neutral-400">{suffix}</span>}
+    <div className="flex flex-col gap-1.5">
+      {label && <Label htmlFor={id}>{label}</Label>}
+      <span className="flex items-center gap-2">
+        <BaseInput id={id} className={className} {...props} />
+        {suffix && <span className="text-xs text-muted-foreground">{suffix}</span>}
       </span>
-    </label>
+    </div>
   )
 }

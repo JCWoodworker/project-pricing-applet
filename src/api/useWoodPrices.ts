@@ -1,6 +1,7 @@
 import { useQuery } from '@tanstack/react-query'
 import { useMemo } from 'react'
 import type { WoodMaterial } from '../lib/openaiBridge'
+import { sampleMaterials } from '../lib/sampleMaterials'
 
 /**
  * Absolute base URL for Repo 2's REST API. Must be absolute (not relative)
@@ -15,11 +16,25 @@ const API_BASE_URL =
 const WOODPRICING_ENDPOINT = `${API_BASE_URL}/api/v1/subapps/woodpricing`
 
 async function fetchWoodMaterials(): Promise<WoodMaterial[]> {
-  const response = await fetch(WOODPRICING_ENDPOINT)
-  if (!response.ok) {
-    throw new Error(`Failed to load wood pricing data (${response.status})`)
+  try {
+    const response = await fetch(WOODPRICING_ENDPOINT)
+    if (!response.ok) {
+      throw new Error(`Failed to load wood pricing data (${response.status})`)
+    }
+    return (await response.json()) as WoodMaterial[]
+  } catch (error) {
+    // Dev-only convenience: if Repo 2 isn't running locally yet, fall back to
+    // sample data so the widget UI is still previewable. Never falls back in
+    // production builds.
+    if (import.meta.env.DEV) {
+      console.warn(
+        `[useWoodPrices] Falling back to sample data — could not reach ${WOODPRICING_ENDPOINT}.`,
+        error,
+      )
+      return sampleMaterials
+    }
+    throw error
   }
-  return response.json() as Promise<WoodMaterial[]>
 }
 
 export function useWoodPrices() {

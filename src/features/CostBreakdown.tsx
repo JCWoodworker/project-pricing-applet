@@ -1,4 +1,3 @@
-import { Card } from '../components'
 import { calculateCost } from '../utils/calculateCost'
 import { findMaterial } from '../api/useWoodPrices'
 import { useEstimatorStore } from '../store/useEstimatorStore'
@@ -14,9 +13,10 @@ const currencyFormatter = new Intl.NumberFormat('en-US', {
 })
 
 /**
- * Reactive display card: converts the selected dimensions into board feet
+ * Reactive result block: converts the selected dimensions into board feet
  * or linear feet (depending on the material's measurementType) and shows
- * the resulting estimated cost.
+ * the resulting estimated cost. `aria-live` so screen readers announce
+ * recalculations as the user edits dimensions.
  */
 export function CostBreakdown({ materials }: CostBreakdownProps) {
   const species = useEstimatorStore((state) => state.species)
@@ -29,10 +29,10 @@ export function CostBreakdown({ materials }: CostBreakdownProps) {
 
   if (!material) {
     return (
-      <Card className="text-sm text-neutral-500">
-        Select a wood species{thickness === null ? ' and thickness' : ''} to see
-        an estimate.
-      </Card>
+      <p className="text-center text-sm text-muted-foreground" aria-live="polite">
+        Select a wood species{thickness === null ? ' and thickness' : ''} to see an
+        estimate.
+      </p>
     )
   }
 
@@ -42,23 +42,19 @@ export function CostBreakdown({ materials }: CostBreakdownProps) {
     widthIn: widthIn ?? 0,
     quantity: quantity ?? 0,
   })
+  const unitNoun = material.measurementType === 'BOARD_FOOT' ? 'board foot' : 'linear foot'
 
   return (
-    <Card className="flex flex-col gap-2">
-      <div className="flex items-baseline justify-between">
-        <span className="text-sm text-neutral-500">Estimated cost</span>
-        <span className="text-2xl font-semibold text-neutral-900">
-          {currencyFormatter.format(result.totalCost)}
-        </span>
-      </div>
-      <div className="flex justify-between text-xs text-neutral-500">
-        <span>
-          {result.units.toFixed(2)} {result.unitLabel}
-        </span>
-        <span>
-          {currencyFormatter.format(material.unitPrice)} / {material.measurementType === 'BOARD_FOOT' ? 'board foot' : 'linear foot'}
-        </span>
-      </div>
-    </Card>
+    <div className="flex flex-col items-center gap-1 text-center" aria-live="polite">
+      <span className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+        Estimated cost
+      </span>
+      <span className="text-3xl font-semibold tracking-tight text-primary">
+        {currencyFormatter.format(result.totalCost)}
+      </span>
+      <span className="text-xs text-muted-foreground">
+        {result.units.toFixed(2)} {result.unitLabel} · {currencyFormatter.format(material.unitPrice)}/{unitNoun}
+      </span>
+    </div>
   )
 }

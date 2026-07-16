@@ -1,14 +1,25 @@
 /**
- * Single swap point for the future `@your-org/ui` npm package. Every feature
- * component imports UI primitives from here — once the package is
- * published, replace these local implementations with re-exports (or direct
- * imports) from it, and no other file needs to change.
+ * Single import point for UI primitives. `Button`, `Card` (+ subcomponents),
+ * and `Label` now come straight from the published `@jfc3303/jafracore-ui`
+ * package. `Select` and `Input` stay as thin local wrappers — `Input` adds
+ * this app's label/suffix layout on top of the library's bare input, and
+ * `Select` fills a gap (the library has no form Select yet). Feature code
+ * only ever imports from here, never from the library or these local files
+ * directly.
  */
-export { Button } from './Button'
-export type { ButtonProps } from './Button'
+export {
+  Button,
+  Card,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+  CardContent,
+  CardFooter,
+  Label,
+} from '@jfc3303/jafracore-ui'
+export type { ButtonProps } from '@jfc3303/jafracore-ui'
+
 export { Select } from './Select'
 export type { SelectProps, SelectOption } from './Select'
 export { Input } from './Input'
 export type { InputProps } from './Input'
-export { Card } from './Card'
-export type { CardProps } from './Card'

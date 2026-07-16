@@ -1,13 +1,78 @@
 @import 'tailwindcss';
+@source '../node_modules/@jfc3303/jafracore-ui/dist';
+
+@import '@jfc3303/jafracore-ui/theme.css';
 
 /*
- * Once the UI library is published and installed, uncomment this and swap in
- * the real package name so Tailwind scans its markup for utility classes too:
- * @source '../node_modules/@your-org/ui';
+ * Wood / outdoor palette: warm parchment + espresso browns with a muted
+ * forest-green accent. Overrides the library's default tokens (same
+ * `--rlw-*` custom properties it reads via `@theme inline`) so every
+ * component — ours and the library's — picks it up automatically.
+ *
+ * Kept low-chroma and light-on-dark (rather than pure black/white) for a
+ * "subtle, not high-contrast" feel, but lightness gaps are wide enough to
+ * clear WCAG AA (4.5:1 body text, 3:1 large text/UI) — verified against
+ * background/card/muted pairings below.
  */
-
 :root {
   color-scheme: light dark;
+
+  --rlw-background: oklch(0.95 0.014 80);
+  --rlw-foreground: oklch(0.27 0.025 55);
+  --rlw-card: oklch(0.985 0.006 85);
+  --rlw-card-foreground: oklch(0.27 0.025 55);
+  --rlw-popover: oklch(0.985 0.006 85);
+  --rlw-popover-foreground: oklch(0.27 0.025 55);
+
+  --rlw-primary: oklch(0.4 0.07 152);
+  --rlw-primary-foreground: oklch(0.98 0.012 90);
+  --rlw-secondary: oklch(0.91 0.02 75);
+  --rlw-secondary-foreground: oklch(0.3 0.03 55);
+  --rlw-muted: oklch(0.92 0.016 80);
+  --rlw-muted-foreground: oklch(0.42 0.03 55);
+  --rlw-accent: oklch(0.89 0.024 85);
+  --rlw-accent-foreground: oklch(0.3 0.03 55);
+
+  --rlw-destructive: oklch(0.5 0.13 35);
+  --rlw-destructive-foreground: oklch(0.98 0.012 90);
+  --rlw-success: oklch(0.48 0.09 145);
+  --rlw-success-foreground: oklch(0.98 0.012 90);
+
+  --rlw-border: oklch(0.85 0.02 75);
+  --rlw-input: oklch(0.85 0.02 75);
+  --rlw-ring: oklch(0.4 0.07 152);
+}
+
+.dark {
+  --rlw-background: oklch(0.22 0.018 50);
+  --rlw-foreground: oklch(0.93 0.015 80);
+  --rlw-card: oklch(0.27 0.02 50);
+  --rlw-card-foreground: oklch(0.93 0.015 80);
+  --rlw-popover: oklch(0.27 0.02 50);
+  --rlw-popover-foreground: oklch(0.93 0.015 80);
+
+  --rlw-primary: oklch(0.7 0.09 150);
+  --rlw-primary-foreground: oklch(0.18 0.02 50);
+  --rlw-secondary: oklch(0.33 0.025 55);
+  --rlw-secondary-foreground: oklch(0.93 0.015 80);
+  --rlw-muted: oklch(0.31 0.02 55);
+  --rlw-muted-foreground: oklch(0.74 0.02 75);
+  --rlw-accent: oklch(0.35 0.025 60);
+  --rlw-accent-foreground: oklch(0.93 0.015 80);
+
+  --rlw-destructive: oklch(0.62 0.14 35);
+  --rlw-destructive-foreground: oklch(0.16 0.02 40);
+  --rlw-success: oklch(0.64 0.1 145);
+  --rlw-success-foreground: oklch(0.16 0.02 40);
+
+  --rlw-border: oklch(1 0 0 / 12%);
+  --rlw-input: oklch(1 0 0 / 16%);
+  --rlw-ring: oklch(0.7 0.09 150);
+}
+
+html,
+body {
+  height: 100%;
 }
 
 body {
@@ -15,5 +80,5 @@ body {
 }
 
 #root {
-  min-height: 100%;
+  height: 100%;
 }
