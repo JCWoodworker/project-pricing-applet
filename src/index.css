@@ -1,0 +1,19 @@
+@import 'tailwindcss';
+
+/*
+ * Once the UI library is published and installed, uncomment this and swap in
+ * the real package name so Tailwind scans its markup for utility classes too:
+ * @source '../node_modules/@your-org/ui';
+ */
+
+:root {
+  color-scheme: light dark;
+}
+
+body {
+  margin: 0;
+}
+
+#root {
+  min-height: 100%;
+}
