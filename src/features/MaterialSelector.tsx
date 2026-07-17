@@ -1,33 +1,34 @@
 import { Select } from '../components'
-import { useSpeciesOptions } from '../api/useWoodPrices'
+import { currencyFormatter } from '../lib/currency'
 import { useEstimatorStore } from '../store/useEstimatorStore'
-import type { WoodMaterial } from '../lib/openaiBridge'
+import type { MaterialCatalogEntry } from '../lib/openaiBridge'
 
 export interface MaterialSelectorProps {
-  materials: WoodMaterial[]
+  catalog: MaterialCatalogEntry[]
 }
 
 /**
- * Species dropdown, plus a thickness dropdown that only appears when a
- * species has more than one stock thickness in the price list (several
- * species, e.g. Acacia/Ebony, only have one — the backend tolerates
- * omitting thickness in that case, so we auto-select it and hide the field).
+ * Species dropdown, plus a thickness dropdown scoped to that species'
+ * `availableThicknesses` — each option shows its price inline (e.g.
+ * "8/4 — $16.95/bf") per the backend's implementation guidance. The
+ * thickness selector is skipped/auto-selected when a species has only one
+ * stock thickness.
  */
-export function MaterialSelector({ materials }: MaterialSelectorProps) {
-  const speciesOptions = useSpeciesOptions(materials)
+export function MaterialSelector({ catalog }: MaterialSelectorProps) {
   const species = useEstimatorStore((state) => state.species)
   const thickness = useEstimatorStore((state) => state.thickness)
   const setSpecies = useEstimatorStore((state) => state.setSpecies)
   const setThickness = useEstimatorStore((state) => state.setThickness)
 
-  const selected = speciesOptions.find((option) => option.species === species)
-  const showThicknessSelector = (selected?.thicknesses.length ?? 0) > 1
+  const selectedEntry = catalog.find((entry) => entry.species === species)
+  const showThicknessSelector = (selectedEntry?.availableThicknesses.length ?? 0) > 1
+  const unitAbbreviation = selectedEntry?.measurementType === 'LINEAR_FOOT' ? 'lf' : 'bf'
 
   function handleSpeciesChange(value: string) {
     setSpecies(value || null)
-    const option = speciesOptions.find((opt) => opt.species === value)
-    if (option?.thicknesses.length === 1) {
-      setThickness(option.thicknesses[0])
+    const entry = catalog.find((opt) => opt.species === value)
+    if (entry?.availableThicknesses.length === 1) {
+      setThickness(entry.availableThicknesses[0].thickness)
     }
   }
 
@@ -40,9 +41,9 @@ export function MaterialSelector({ materials }: MaterialSelectorProps) {
           placeholder="Select a species"
           value={species ?? ''}
           onChange={(event) => handleSpeciesChange(event.target.value)}
-          options={speciesOptions.map((option) => ({
-            value: option.species,
-            label: option.species,
+          options={catalog.map((entry) => ({
+            value: entry.species,
+            label: entry.species,
           }))}
         />
       </div>
@@ -55,9 +56,9 @@ export function MaterialSelector({ materials }: MaterialSelectorProps) {
             placeholder="Select a thickness"
             value={thickness ?? ''}
             onChange={(event) => setThickness(event.target.value || null)}
-            options={(selected?.thicknesses ?? []).map((value) => ({
-              value,
-              label: value,
+            options={(selectedEntry?.availableThicknesses ?? []).map((option) => ({
+              value: option.thickness,
+              label: `${option.thickness} — ${currencyFormatter.format(option.unitPrice)}/${unitAbbreviation}`,
             }))}
           />
         </div>

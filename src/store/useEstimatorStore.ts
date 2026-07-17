@@ -4,14 +4,11 @@ import { getWidgetState, setWidgetState } from '../lib/openaiBridge'
 interface EstimatorState {
   species: string | null
   thickness: string | null
-  lengthFt: number | null
-  widthIn: number | null
   quantity: number | null
   setSpecies: (species: string | null) => void
   setThickness: (thickness: string | null) => void
-  setLengthFt: (lengthFt: number | null) => void
-  setWidthIn: (widthIn: number | null) => void
   setQuantity: (quantity: number | null) => void
+  /** Restores the last persisted widget state, e.g. on a widget remount. */
   hydrateFromWidgetState: () => void
 }
 
@@ -23,8 +20,6 @@ function persistDebounced(state: EstimatorState): void {
     void setWidgetState({
       species: state.species,
       thickness: state.thickness,
-      length: state.lengthFt,
-      width: state.widthIn,
       quantity: state.quantity,
     })
   }, 300)
@@ -33,9 +28,7 @@ function persistDebounced(state: EstimatorState): void {
 export const useEstimatorStore = create<EstimatorState>((set, get) => ({
   species: null,
   thickness: null,
-  lengthFt: null,
-  widthIn: null,
-  quantity: 1,
+  quantity: null,
 
   setSpecies: (species) => {
     set({ species, thickness: null })
@@ -43,14 +36,6 @@ export const useEstimatorStore = create<EstimatorState>((set, get) => ({
   },
   setThickness: (thickness) => {
     set({ thickness })
-    persistDebounced(get())
-  },
-  setLengthFt: (lengthFt) => {
-    set({ lengthFt })
-    persistDebounced(get())
-  },
-  setWidthIn: (widthIn) => {
-    set({ widthIn })
     persistDebounced(get())
   },
   setQuantity: (quantity) => {
@@ -64,8 +49,6 @@ export const useEstimatorStore = create<EstimatorState>((set, get) => ({
     set({
       species: saved.species,
       thickness: saved.thickness,
-      lengthFt: saved.length,
-      widthIn: saved.width,
       quantity: saved.quantity,
     })
   },

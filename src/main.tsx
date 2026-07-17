@@ -4,12 +4,12 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import './index.css'
 import App from './App.tsx'
 import { installMockBridge } from './lib/openaiBridge'
-import { sampleMaterials } from './lib/sampleMaterials'
+import { sampleCatalog } from './lib/sampleCatalog'
 
 // Outside ChatGPT (e.g. plain `vite dev`), stand in for the host bridge so
-// widget-state get/set calls succeed instead of silently no-op-ing.
+// callTool()/setWidgetState() calls succeed instead of failing outright.
 if (import.meta.env.DEV) {
-  installMockBridge(sampleMaterials)
+  installMockBridge(sampleCatalog)
 }
 
 const queryClient = new QueryClient()

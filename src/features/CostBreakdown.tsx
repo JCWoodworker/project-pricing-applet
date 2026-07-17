@@ -1,48 +1,54 @@
-import { calculateCost } from '../utils/calculateCost'
-import { findMaterial } from '../api/useWoodPrices'
+import { useCalculateProjectCost } from '../api/useCalculateProjectCost'
+import { currencyFormatter } from '../lib/currency'
 import { useEstimatorStore } from '../store/useEstimatorStore'
-import type { WoodMaterial } from '../lib/openaiBridge'
-
-export interface CostBreakdownProps {
-  materials: WoodMaterial[]
-}
-
-const currencyFormatter = new Intl.NumberFormat('en-US', {
-  style: 'currency',
-  currency: 'USD',
-})
 
 /**
- * Reactive result block: converts the selected dimensions into board feet
- * or linear feet (depending on the material's measurementType) and shows
- * the resulting estimated cost. `aria-live` so screen readers announce
- * recalculations as the user edits dimensions.
+ * Calls `calculate_project_cost` whenever species + thickness + quantity are
+ * all set (debounced — see `useCalculateProjectCost`) and displays the
+ * resulting `totalCost`. All pricing math happens server-side; this
+ * component only renders the response. `aria-live` so screen readers
+ * announce recalculations as the user edits the form.
  */
-export function CostBreakdown({ materials }: CostBreakdownProps) {
+export function CostBreakdown() {
   const species = useEstimatorStore((state) => state.species)
   const thickness = useEstimatorStore((state) => state.thickness)
-  const lengthFt = useEstimatorStore((state) => state.lengthFt)
-  const widthIn = useEstimatorStore((state) => state.widthIn)
   const quantity = useEstimatorStore((state) => state.quantity)
 
-  const material = findMaterial(materials, species, thickness)
+  const { data, isLoading, isError, isNotFoundError } = useCalculateProjectCost({
+    species,
+    thickness,
+    quantity,
+  })
 
-  if (!material) {
+  if (!species || !thickness || !quantity || quantity <= 0) {
     return (
       <p className="text-center text-sm text-muted-foreground" aria-live="polite">
-        Select a wood species{thickness === null ? ' and thickness' : ''} to see an
-        estimate.
+        Select a wood species, thickness, and quantity to see an estimate.
       </p>
     )
   }
 
-  const result = calculateCost({
-    material,
-    lengthFt: lengthFt ?? 0,
-    widthIn: widthIn ?? 0,
-    quantity: quantity ?? 0,
-  })
-  const unitNoun = material.measurementType === 'BOARD_FOOT' ? 'board foot' : 'linear foot'
+  if (isLoading) {
+    return (
+      <p className="text-center text-sm text-muted-foreground" role="status" aria-live="polite">
+        Calculating…
+      </p>
+    )
+  }
+
+  if (isError) {
+    return (
+      <p className="text-center text-sm text-destructive" role="alert" aria-live="polite">
+        {isNotFoundError
+          ? "That species/thickness combination isn't priced right now."
+          : "Couldn't calculate a price. Please try again."}
+      </p>
+    )
+  }
+
+  if (!data) return null
+
+  const unitNoun = data.measurementType === 'BOARD_FOOT' ? 'board foot' : 'linear foot'
 
   return (
     <div className="flex flex-col items-center gap-1 text-center" aria-live="polite">
@@ -50,10 +56,11 @@ export function CostBreakdown({ materials }: CostBreakdownProps) {
         Estimated cost
       </span>
       <span className="text-3xl font-semibold tracking-tight text-primary">
-        {currencyFormatter.format(result.totalCost)}
+        {currencyFormatter.format(data.totalCost)}
       </span>
       <span className="text-xs text-muted-foreground">
-        {result.units.toFixed(2)} {result.unitLabel} · {currencyFormatter.format(material.unitPrice)}/{unitNoun}
+        {data.quantity} {data.measurementType === 'BOARD_FOOT' ? 'board feet' : 'linear feet'} ·{' '}
+        {currencyFormatter.format(data.unitPrice)}/{unitNoun}
       </span>
     </div>
   )
